@@ -75,33 +75,17 @@ class Repo101 {
                 def contrib = it.rawEdge.subject
                 getResource(contrib).outE('http://101companies.org/property/mentions').toList().collect{
                      
-                getResource(it.rawEdge.object).outE('http://101companies.org/property/instanceOf').filter{
-                        print it.inV.outE('rdf:type').inV.toList().collect{it.label.toString()}
-                        return true 
+                    def res = getResource(it.rawEdge.object).outE('http://101companies.org/property/instanceOf').collect{
+                        def concept = getResource("Concept")
+                        if (it.inV.outE('rdf:type').inV.filter{it == concept}.size() > 0){
+                            return it.inV.toList()
+                        }
                     }.toList()
-                    print '\n'
+
+                    print res
                 }
             }
         }
-
-        //def allPages = graph.E.has('label', PAGE).inV[0..11].toList()//
-
-        /*def inV = allPages.in.toList()
-
-        def r = inV[0]
-        println('resource: ' + r.getId())
-
-        return  [new Resource(r)]  */
-
-        // TODO: have a look at http://www.tinkerpop.com/docs/javadocs/blueprints/2.1.0/index.html?com/tinkerpop/blueprints/oupls/sail/Matcher.html
-        // perhaps we don't need to traverse graph, but rather apply the matcher directly
-
-        /*allPages.toList().collect {
-          def inV = it.in.toList()
-
-          def r = inV[0]
-          println('resource: ' + r.getId())
-        }*/
     }
 
     //'http://101companies.org/resource/Namespace-3ANamespace'
