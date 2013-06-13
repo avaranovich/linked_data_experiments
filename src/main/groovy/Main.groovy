@@ -77,34 +77,27 @@ class Repo101 {
         println "relatesTo:" + edges.findAll {it.label == Properties.RELATES_TO}.size()
     }
 
-    public void getAllPages() {
+    public examineConcepts(ns) {
         // getting all pages
         graph.addNamespace('wiki', 'http://101companies.org/resource/')
         //def labels = [graph.uri('wiki:instanceOf')]
 
         //g.addNamespace(concept, ‘http://101companies.org/resources/concepts’)
-        def nsLanguage = getResource('http://101companies.org/resources/concepts/Functional_programming_language')
+        def nsLanguage = getResource(ns)
         println(nsLanguage)
-        print '\n\n'
-
-        nsLanguage.inE('http://101companies.org/property/instanceOf').toList().collect{
-            def lang = it.rawEdge.subject
-            print lang
-            print '\n\n'
-            getResource(lang).inE('http://101companies.org/property/uses').toList().collect{
-                //contribution
-                def contrib = it.rawEdge.subject
-                getResource(contrib).outE('http://101companies.org/property/mentions').toList().collect{
-                    print "resource: "
-                    println it
-                    def concept = getResource("http://101companies.org/resources/namespaces/Concept")
-                    if (it.inV.outE('http://101companies.org/property/instanceOf').inV.filter{it == concept}.toList().size() > 0){
-                        println "concept"
-                    }
-                }
-            }
-        }
-    }
+        //println nsLanguage.inE('http://101companies.org/property/instanceOf').outV.toList()
+        def concept = getResource("http://101companies.org/resources/namespaces/Concept")
+        def concepts = nsLanguage.inE('http://101companies.org/property/instanceOf').outV. //languages
+                   inE('http://101companies.org/property/uses').outV.       // contributions
+                   outE('http://101companies.org/property/mentions').inV.toList().findAll{
+                    it.outE('http://101companies.org/property/instanceOf').inV.filter{it == concept}.toList().size() > 0
+                   }
+        println "# concepts: " + concepts.size()
+        println "concepts: " + concepts
+        println "# unique concepts: " + concepts.unique().size()
+        println "unique concepts: " + concepts.unique()
+        return concepts.unique()  
+      }
 
     //'http://101companies.org/resource/Namespace-3ANamespace'
     public SailVertex getResource(url){
