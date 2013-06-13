@@ -3,7 +3,8 @@ import groovy.json.JsonBuilder
 class Run{
     void run(){
         def m = new Repo101()
-        m.getAllPages()
+        //m.getAllPages()
+        m.statistics()
 
         /*def json = new JsonBuilder()
         json.wiki{

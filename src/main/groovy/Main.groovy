@@ -2,6 +2,7 @@ import com.tinkerpop.blueprints.Direction
 import com.tinkerpop.blueprints.impls.sail.SailGraph
 import com.tinkerpop.blueprints.impls.sail.SailVertex
 import com.tinkerpop.blueprints.impls.sail.impls.LinkedDataSailGraph
+import com.tinkerpop.blueprints.oupls.sail.*
 import com.tinkerpop.gremlin.groovy.Gremlin
 import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
@@ -10,6 +11,8 @@ import net.fortytwo.sesametools.reposail.RepositorySail
 import org.openrdf.query.resultio.TupleQueryResultFormat
 import org.openrdf.repository.Repository
 import org.openrdf.repository.http.HTTPRepository
+import org.openrdf.model.URI
+import org.openrdf.model.impl.URIImpl
 
 import static Repo101.Properties.*
 
@@ -50,12 +53,28 @@ class Repo101 {
 
         repo.initialize();
 
-        graph = new LinkedDataSailGraph(new SailGraph(new RepositorySail(repo)));
+        graph = new LinkedDataSailGraph(new SailGraph(new RepositorySail(repo)))
         graph.addDefaultNamespaces()
         graph.addNamespace('v101','http://101companies.org/properties/')
         graph.addNamespace('wiki', 'http://101companies.org/resource/')
         graph.addNamespace('swivt', 'http://semantic-mediawiki.org/swivt/1.0')
         graph.addNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+
+    }
+
+    public void statistics(){
+        def edges =  graph.getEdges().toList()
+        println "dependsOn:" + edges.findAll {it.label == Properties.DEPENDS_ON}.size()
+        println "identifies:" + edges.findAll {it.label == Properties.IDENTIFIES}.size()
+        println "linksTo:" + edges.findAll {it.label == Properties.LINKS_TO}.size()
+        println "cites:" + edges.findAll {it.label == Properties.CITES}.size()
+        println "uses:" +  edges.findAll {it.label == Properties.USES}.size()
+        println "implements:" + edges.findAll {it.label == Properties.IMPLEMENTS}.size()
+        println "instanceOf:" + edges.findAll {it.label == Properties.INSTANCE_OF}.size()
+        println "isA:" + edges.findAll {it.label == Properties.IS_A}.size()
+        println "developedBy:" + edges.findAll {it.label == Properties.DEVELOPED_BY}.size()
+        println "reviewedBy:" + edges.findAll {it.label == Properties.REVIEWED_BY}.size()
+        println "relatesTo:" + edges.findAll {it.label == Properties.RELATES_TO}.size()
     }
 
     public void getAllPages() {
@@ -66,23 +85,22 @@ class Repo101 {
         //g.addNamespace(concept, ‘http://101companies.org/resources/concepts’)
         def nsLanguage = getResource('http://101companies.org/resources/concepts/Functional_programming_language')
         println(nsLanguage)
+        print '\n\n'
 
         nsLanguage.inE('http://101companies.org/property/instanceOf').toList().collect{
             def lang = it.rawEdge.subject
             print lang
+            print '\n\n'
             getResource(lang).inE('http://101companies.org/property/uses').toList().collect{
                 //contribution
                 def contrib = it.rawEdge.subject
                 getResource(contrib).outE('http://101companies.org/property/mentions').toList().collect{
-                     
-                    def res = getResource(it.rawEdge.object).outE('http://101companies.org/property/instanceOf').collect{
-                        def concept = getResource("Concept")
-                        if (it.inV.outE('rdf:type').inV.filter{it == concept}.size() > 0){
-                            return it.inV.toList()
-                        }
-                    }.toList()
-
-                    print res
+                    print "resource: "
+                    println it
+                    def concept = getResource("http://101companies.org/resources/namespaces/Concept")
+                    if (it.inV.outE('http://101companies.org/property/instanceOf').inV.filter{it == concept}.toList().size() > 0){
+                        println "concept"
+                    }
                 }
             }
         }
