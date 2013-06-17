@@ -79,7 +79,7 @@ class Repo101 {
 
     public examineConcepts(ns) {
         // getting all pages
-        graph.addNamespace('wiki', 'http://101companies.org/resource/')
+        // graph.addNamespace('wiki', 'http://101companies.org/resource/')
         //def labels = [graph.uri('wiki:instanceOf')]
 
         //g.addNamespace(concept, ‘http://101companies.org/resources/concepts’)
